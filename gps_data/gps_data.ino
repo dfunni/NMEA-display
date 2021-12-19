@@ -4,7 +4,7 @@ Raw NMEA messages also passed over USB serial.
 
 LCD display layout:
  --------------------------------------------
- |UTC time                   num SV messages|
+ |UTC time            valid  num SV messages|
  |number of sattelites      CNo of top 3 SVs|
  --------------------------------------------
 
@@ -80,13 +80,50 @@ void parse_gpgsv(String gpgsv){
   lcd.setCursor(14,0);
   lcd.print(nMess);
   
-  lcd.setCursor(8,1);
-  lcd.print(CNo1);
-  lcd.setCursor(11,1);
-  lcd.print(CNo2);
-  lcd.setCursor(14,1);
-  lcd.print(CNo3);
+  if (nMess == 1) {
+    lcd.setCursor(8,1);
+    lcd.print(CNo1);
+    lcd.setCursor(11,1);
+    lcd.print("--");
+    lcd.setCursor(14,1);
+    lcd.print("--");
+  }
+  if (nMess == 2) {
+    lcd.setCursor(8,1);
+    lcd.print(CNo1);
+    lcd.setCursor(11,1);
+    lcd.print(CNo2);
+    lcd.setCursor(14,1);
+    lcd.print("--");
+  }
+  if (nMess >= 3) {
+    lcd.setCursor(8,1);
+    lcd.print(CNo1);
+    lcd.setCursor(11,1);
+    lcd.print(CNo2);
+    lcd.setCursor(14,1);
+    lcd.print(CNo3);
+  }
+}
 
+void parse_gprmc(String gprmc){  
+  int c1 = gprmc.indexOf(','); // time
+  int c2 = gprmc.indexOf(',', c1+1); // valid
+  int c3 = gprmc.indexOf(',', c2+1); // lat 
+  int c4 = gprmc.indexOf(',', c3+1); // N/S
+  int c5 = gprmc.indexOf(',', c4+1); // long 
+  int c6 = gprmc.indexOf(',', c5+1); // E/W
+  int c7 = gprmc.indexOf(',', c6+1); // speed in knots
+  int c8 = gprmc.indexOf(',', c7+1); // course
+  int c9 = gprmc.indexOf(',', c8+1); // date
+  int c10 = gprmc.indexOf(',', c9+1); // variation
+  int c11 = gprmc.indexOf(',', c10+1); // E/W
+  int c12 = gprmc.indexOf(',', c11+1); // checksum
+  
+  String Valid = gprmc.substring(c1+1, c2);
+  
+  lcd.setCursor(12,0);
+  lcd.print(Valid);
 }
   
 
@@ -96,6 +133,9 @@ void parse_sentence(String sent) {
   }
   else if (sent.substring(0, 6) == "$GPGSV"){
     parse_gpgsv(sent.substring(7));
+  }
+  else if (sent.substring(0, 6) == "$GPRMC"){
+    parse_gprmc(sent.substring(7));
   }
 }
 
